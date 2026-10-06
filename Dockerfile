@@ -1,10 +1,24 @@
-FROM docker.io/python:3.12-slim
+# Maestro builds this image as is. Two conventions are all it asks:
+#   - ENTRYPOINT is your program. Each line of `parameters` in maestro.toml
+#     replaces CMD, so it reaches the program as its arguments.
+#   - What you want kept goes to the paths listed under `outputs`.
 
-WORKDIR /app
-COPY main.py .
+FROM docker.io/library/python:3.12-slim
 
-# Runs at build time, so you can watch it stream through your endpoint
-RUN python -u main.py build
+# Relative outputs are looked for here once the container ends.
+WORKDIR /work
 
-# Runs when someone starts a container from the image
-CMD ["python", "-u", "main.py", "run"]
+# Dependencies first, so editing the code doesn't reinstall them.
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY . /app
+
+# Absolute outputs must exist for the program to write to.
+RUN mkdir -p /var/log/app
+
+# -u prints as it goes, so `maestro runs logs` follows a running line.
+ENTRYPOINT ["python", "-u", "/app/main.py"]
+
+# Used when maestro.toml has no `parameters`.
+CMD ["-t", "1", "out.txt"]
