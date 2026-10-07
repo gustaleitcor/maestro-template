@@ -16,6 +16,10 @@ maestro runs show <run>      # where each line ran and how it ended
 maestro runs get <run>       # downloads the outputs and logs
 ```
 
+To try this template as it is, no forge and no token is needed, since the
+repo is public: `maestro build https://github.com/<owner>/maestro-template`.
+Add a forge (`maestro forges add`) to build your private repos.
+
 Each run's files are also on the Maestro page, under "My runs and their
 files", as `<run>/<line>/<file>`.
 
