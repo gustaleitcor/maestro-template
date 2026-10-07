@@ -5,7 +5,7 @@
 # Every key is optional, and so is the file. Without it, a run is one
 # container with the image's own CMD, on any machine, keeping only its logs.
 
-# Machines the containers may run on, as `maestro machine list` names them.
+# Machines the containers may run on, as `maestro machines list` names them.
 # Default: any.
 # machines = ["Q1", "Q2", "Q3"]
 
@@ -28,7 +28,8 @@ parameters = [
 # containers writing the same path don't clash.
 #
 # A path the container never created is noted as missing; the run doesn't
-# fail for it. What a container prints is always kept, as <line>.log.
+# fail for it. What a container prints is always kept with them, as
+# stdout.log and stderr.log; an output of either name is replaced by it.
 # Default: none.
 outputs = [
   "out.txt",
