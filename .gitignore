@@ -3,4 +3,4 @@ __pycache__/
 .venv/
 
 # What main.py writes when run here rather than in a container.
-out.txt
+solution.json

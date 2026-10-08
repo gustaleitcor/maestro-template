@@ -6,12 +6,12 @@
 # One container per line. A line replaces the image's CMD, so main.py gets it
 # as its arguments. No shell runs it: quotes group words, nothing else.
 parameters = [
-  "-t 10 out.txt",
-  "-t 20 --label 'long run' out.txt",
+  "small",
+  "large --time-limit 120",
 ]
 
 # More lines, computed: one per string that genvrs() yields in this file.
-# generator = "genvrs.py"
+generator = "genvrs.py"
 
 # Copied out of each container when it ends. What it prints is always kept.
-outputs = ["out.txt"]
+outputs = ["solution.json"]

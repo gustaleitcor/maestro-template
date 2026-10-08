@@ -1,16 +1,19 @@
 # maestro-template
 
-A repo that Maestro builds and runs. Fork it, replace `main.py` with your
-program, and adjust `maestro.toml`. The `knapsack` branch is a fuller
-example: real problems, solved with a solver, their lines computed.
+A repo that Maestro builds and runs, with a small real job in it: knapsack
+problems solved with [mip](https://www.python-mip.com), one container per
+instance and capacity. Fork it, replace `main.py` with your program, and
+adjust `maestro.toml`.
 
 | File | What it is |
 | --- | --- |
 | `Dockerfile` | Builds the image; your program is its `ENTRYPOINT` |
 | `maestro.toml` | Which machines, one container per line of `parameters`, which `outputs` to keep |
-| `genvrs.py` | Optional: computes more lines instead of writing them out |
-| `main.py` | A stand-in program: `-t <seconds> <output file>` |
-| `requirements.txt` | Your program's Python dependencies |
+| `genvrs.py` | Computes more lines: every instance in `instances/`, at three capacities |
+| `main.py` | The program: solves one instance and writes `solution.json` |
+| `knapsack.py` | Reads the instances; used by both of the above |
+| `instances/` | The problems, one file each |
+| `requirements.txt` | The program's Python dependencies |
 
 ```sh
 maestro build <your fork> --watch   # build, run, and follow until it ends

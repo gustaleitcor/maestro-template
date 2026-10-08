@@ -12,4 +12,4 @@ COPY . /app
 ENTRYPOINT ["python", "-u", "/app/main.py"]
 
 # Used when maestro.toml has no lines.
-CMD ["-t", "1", "out.txt"]
+CMD ["small"]
