@@ -1,1 +1,13 @@
+# Kept out of the image: only what main.py needs goes in.
 .git
+.gitignore
+.dockerignore
+__pycache__/
+*.pyc
+.venv/
+out.txt
+README.md
+
+# Read by Maestro from the repo when it builds, not by the program.
+maestro.toml
+genvrs.py

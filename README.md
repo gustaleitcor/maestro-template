@@ -1,27 +1,25 @@
 # maestro-template
 
-A starting point for a repo that Maestro builds and runs. Fork it, replace
-`main.py` with your program, and adjust `maestro.toml`.
+A repo that Maestro builds and runs. Fork it, replace `main.py` with your
+program, and adjust `maestro.toml`. The `knapsack` branch is a fuller
+example: real problems, solved with a solver, their lines computed.
 
-- `Dockerfile`: builds the image. Your program is the `ENTRYPOINT`.
-- `maestro.toml`: how runs use the image: on which machines, one container
-  per line of `parameters`, and which `outputs` to keep from each.
-- `main.py`: a stand-in program that takes `-t <seconds> <output file>`.
-- `requirements.txt`: your program's Python dependencies.
+| File | What it is |
+| --- | --- |
+| `Dockerfile` | Builds the image; your program is its `ENTRYPOINT` |
+| `maestro.toml` | Which machines, one container per line of `parameters`, which `outputs` to keep |
+| `genvrs.py` | Optional: computes more lines instead of writing them out |
+| `main.py` | A stand-in program: `-t <seconds> <output file>` |
+| `requirements.txt` | Your program's Python dependencies |
 
 ```sh
-maestro build <your fork>    # builds the image; prints its build number
-maestro run <build>          # one container per line of parameters
-maestro runs show <run>      # where each line ran and how it ended
-maestro runs get <run>       # downloads the outputs and logs
+maestro build <your fork> --watch   # build, run, and follow until it ends
+maestro runs get <run>              # download the outputs and logs
 ```
 
-To try this template as it is, no forge and no token is needed, since the
-repo is public: `maestro build https://github.com/<owner>/maestro-template`.
-Add a forge (`maestro forges add`) to build your private repos.
-
-Each run's files are also on the Maestro page, under "My runs and their
-files", as `<run>/<line>/<file>`.
+Or step by step: `maestro build <your fork>`, then `maestro run <build>` and
+`maestro runs show <run>`. A public repo needs no forge token; add one with
+`maestro forges add` for private repos.
 
 Without a `maestro.toml`, Maestro runs the image's own `CMD` once, on any
 machine, and keeps only what it prints.
