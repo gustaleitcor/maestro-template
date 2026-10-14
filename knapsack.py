@@ -1,4 +1,4 @@
-"""The knapsack instances in instances/: main.py solves them, genvrs.py lists them.
+"""The knapsack instances in instances/, as main.py loads them to solve one.
 
 A file is `<items> <capacity>` on its first line, then `<value> <weight>` per item.
 """
@@ -16,11 +16,11 @@ class Instance(NamedTuple):
     weights: list[int]
 
 
-def names():
+def names() -> list[str]:
     return sorted(path.stem for path in FOLDER.glob("*.txt"))
 
 
-def load(name):
+def load(name: str) -> Instance:
     rows = [line.split() for line in (FOLDER / f"{name}.txt").read_text().splitlines() if line.strip()]
     count, capacity = map(int, rows[0])
     items = [(int(value), int(weight)) for value, weight in rows[1:]]

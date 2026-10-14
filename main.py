@@ -19,7 +19,7 @@ parser.add_argument("--time-limit", type=int, default=10, help="seconds to searc
 args = parser.parse_args()
 
 instance = knapsack.load(args.instance)
-capacity = instance.capacity if args.capacity is None else args.capacity
+capacity: int = instance.capacity if args.capacity is None else args.capacity
 items = range(len(instance.values))
 
 model = Model("knapsack")
@@ -33,7 +33,7 @@ if status not in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE):
     sys.exit(f"{args.instance}: no solution ({status.name})")
 
 taken = [i for i in items if take[i].x >= 0.99]
-solution = {
+solution: dict[str, object] = {
     "instance": args.instance,
     "capacity": capacity,
     "optimal": status == OptimizationStatus.OPTIMAL,

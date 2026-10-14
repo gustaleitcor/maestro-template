@@ -11,7 +11,7 @@ adjust `maestro.toml`.
 | `maestro.toml` | Which machines, one container per line of `parameters`, which `outputs` to keep |
 | `genvrs.py` | Computes more lines: every instance in `instances/`, at three capacities |
 | `main.py` | The program: solves one instance and writes `solution.json` |
-| `knapsack.py` | Reads the instances; used by both of the above |
+| `knapsack.py` | Reads the instances for `main.py` |
 | `instances/` | The problems, one file each |
 | `requirements.txt` | The program's Python dependencies |
 
