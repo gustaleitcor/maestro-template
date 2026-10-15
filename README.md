@@ -8,8 +8,8 @@ adjust `maestro.toml`.
 | File | What it is |
 | --- | --- |
 | `Dockerfile` | Builds the image; your program is its `ENTRYPOINT` |
-| `maestro.toml` | Which machines, one container per line of `parameters`, which `outputs` to keep |
-| `genvrs.py` | Computes more lines: every instance in `instances/`, at three capacities |
+| `maestro.toml` | Which machines, one container per line of `parameters`, the `cpus`, `memory` and `env` of each, which `outputs` to keep |
+| `genvrs.py` | Computes more lines: every instance in `instances/`, at three capacities, giving the big ones more memory through `Config` |
 | `main.py` | The program: solves one instance and writes `solution.json` |
 | `knapsack.py` | Reads the instances for `main.py` |
 | `instances/` | The problems, one file each |
