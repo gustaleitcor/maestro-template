@@ -15,7 +15,9 @@ parameters = [
 generator = "genvrs.py"
 
 # What each container may use: whole CPU cores, and memory in MB. There is
-# always a limit. Default: 1 and 512.
+# always a limit. Default: 1 and 512. They also decide where and when a line
+# runs: a machine starts it once that much is free there, so asking for less
+# starts it sooner, and a line larger than every machine is refused.
 cpus = 1
 memory = 512
 

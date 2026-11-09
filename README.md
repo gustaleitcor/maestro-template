@@ -24,5 +24,12 @@ Or step by step: `maestro build <your fork>`, then `maestro run <build>` and
 `maestro runs show <run>`. A public repo needs no forge token; add one with
 `maestro forges add` for private repos.
 
+Lines wait in a queue before they start, and those of different users are
+interleaved as the Maestro administrator set the scheduler up, so a large
+run doesn't hold everyone else back. A line starts once a machine has its
+`cpus` and `memory` free: asking for what your program needs, and no more,
+starts it sooner. `maestro queue` shows where your lines wait and your share
+of the machines; `maestro usage`, what they used.
+
 Without a `maestro.toml`, Maestro runs the image's own `CMD` once, on any
 machine, and keeps only what it prints.
