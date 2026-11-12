@@ -1,29 +1,33 @@
-# How Maestro runs the image this repo builds. Every key is optional.
+# How Maestro runs the stress test. Every key is optional.
 
 # Where it may run: names from `maestro machines list`. Default: any machine.
-machines = ["dual"]
+machines = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12"]
 
 # One container per line. A line replaces the image's CMD, so main.py gets it
 # as its arguments. No shell runs it: quotes group words, nothing else.
+# One of each mode, at maestro.toml's cpus and memory.
 parameters = [
-  "small",
-  "large --time-limit 120",
+  "sleep 30",
+  "burn 30",
+  "hold 30 --fraction 0.5",
+  "mix 30",
 ]
 
-# More lines, computed: one per string that genvrs() yields in this file.
-# Its class Config can change outputs, cpus, memory and env for each line.
+# More lines, computed: 996 of many sizes, which makes 1000, the most a run
+# may have. Its class Config changes outputs, cpus, memory and env per line.
 generator = "genvrs.py"
 
 # What each container may use: whole CPU cores, and memory in MB. There is
 # always a limit. Default: 1 and 512. They also decide where and when a line
-# runs: a machine starts it once that much is free there, so asking for less
-# starts it sooner, and a line larger than every machine is refused.
+# runs: a machine starts it once that much is free there.
 cpus = 1
 memory = 512
 
 # Variables of each container's environment, besides orq's own MAESTRO_CPUS,
-# MAESTRO_MEMORY and the like, which main.py reads. Default: none.
-env = { SEED = "42" }
+# MAESTRO_MEMORY and the like, which main.py reads. Default: none. The
+# generator's lines set their own instead.
+env = { STRESS_LINE = "parameters", STRESS_SHAPE = "default" }
 
 # Copied out of each container when it ends. What it prints is always kept.
-outputs = ["solution.json"]
+# Lines run with --samples also keep samples.csv, which genvrs.py adds.
+outputs = ["report.json"]

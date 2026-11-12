@@ -1,17 +1,52 @@
-"""Computes lines of parameters: every instance, with tighter and looser sacks.
+"""Computes the stress test's lines: a thousand containers of many sizes.
 
 Maestro calls genvrs() once, when it builds the image, and starts a container
-per string it yields. It runs with Python's standard library and this repo's
-files, so it reads instances/ itself.
+per string it yields. Each line gets a shape, the cpus and memory it asks
+for, from SHAPES; a mode, what main.py does with them; and how long. They are
+drawn at random, from a fixed seed, so every build of a commit gives the
+same lines.
+
+Sizes are for the q1 to q12 machines: 20 cores and about 15 GB each, the
+smallest 15161 MB. A line larger than every machine maestro.toml names is
+refused, so none asks for more.
 """
 
+import random
 from collections.abc import Generator
-from pathlib import Path
+from typing import NamedTuple
 
-INSTANCES = Path(__file__).parent / "instances"
+# With maestro.toml's 4 lines of parameters, a run of 1000, Maestro's most.
+LINES = 996
+SEED = 2026
 
-# Each instance is solved again with its capacity scaled by these.
-SCALES: tuple[float, ...] = (0.25, 0.5, 2)
+
+class Shape(NamedTuple):
+    name: str
+    # None is maestro.toml's: 1 core and 512 MB.
+    cpus: int | None
+    memory: int | None
+    # How often it is drawn, against the others'.
+    weight: int
+
+
+SHAPES: tuple[Shape, ...] = (
+    Shape("tiny", 1, 64, 15),
+    Shape("default", None, None, 20),
+    Shape("small", 1, 256, 10),
+    Shape("medium", 2, 1024, 15),
+    Shape("wide", 8, 512, 8),  # many cores, little memory
+    Shape("tall", 1, 6144, 8),  # one core, much memory
+    Shape("large", 4, 4096, 10),
+    Shape("xlarge", 8, 8192, 6),
+    Shape("half", 10, 7168, 4),
+    Shape("whole", 20, 14336, 1),  # a machine to itself
+)
+
+# What main.py does with them, and how often.
+MODES: dict[str, int] = {"sleep": 40, "burn": 20, "hold": 20, "mix": 20}
+
+# Every this many lines, one fails on purpose.
+FAIL_EVERY = 100
 
 
 class Config:
@@ -31,20 +66,35 @@ class Config:
 
 
 def genvrs() -> Generator[str]:
-    for path in sorted(INSTANCES.glob("*.txt")):
-        # The first line is `<items> <capacity>`.
-        with path.open() as f:
-            items, capacity = map(int, f.readline().split())
+    rng = random.Random(SEED)
+    counts: dict[str, int] = {}
+    for n in range(1, LINES + 1):
+        shape = rng.choices(SHAPES, weights=[s.weight for s in SHAPES])[0]
+        mode = rng.choices(list(MODES), weights=list(MODES.values()))[0]
+        # Mostly short, some long; the largest shapes stay longer.
+        seconds = rng.choice((10, 20, 30, 45, 60, 90, 120))
+        if shape.cpus is not None and shape.cpus >= 10:
+            seconds *= 2
 
-        # Bigger instances get longer to prove their answer is the best.
-        seconds = 10 if items <= 30 else 60
+        Config.cpus = shape.cpus
+        Config.memory = shape.memory
+        Config.env = {"STRESS_LINE": str(n), "STRESS_SHAPE": shape.name}
 
-        # And more memory for the solver's search tree than maestro.toml's.
-        Config.memory = None if items <= 30 else 1024
-        Config.env = {"ITEMS": str(items)}
+        line = f"{mode} {seconds}"
+        if mode in ("hold", "mix"):
+            line += f" --fraction {rng.choice((0.3, 0.5, 0.7, 0.85))}"
+        # One in ten also keeps its samples: an output maestro.toml lacks.
+        if rng.random() < 0.1:
+            line += " --samples"
+            Config.outputs = ["report.json", "samples.csv"]
+        else:
+            Config.outputs = None
+        if n % FAIL_EVERY == 0:
+            line += " --exit-code 3"
 
-        for scale in SCALES:
-            yield f"{path.stem} --capacity {round(capacity * scale)} --time-limit {seconds}"
+        counts[shape.name] = counts.get(shape.name, 0) + 1
+        yield line
 
-        # Printed lines go to the build log.
-        print(f"{path.stem}: {items} items, capacity {capacity}")
+    # Printed lines go to the build log.
+    for shape in SHAPES:
+        print(f"{shape.name:8} {shape.cpus or 1:>2} CPUs {shape.memory or 512:>6} MB: {counts.get(shape.name, 0)} lines")

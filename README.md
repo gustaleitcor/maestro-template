@@ -1,35 +1,57 @@
-# maestro-template
+# maestro-template: stress
 
-A repo that Maestro builds and runs, with a small real job in it: knapsack
-problems solved with [mip](https://www.python-mip.com), one container per
-instance and capacity. Fork it, replace `main.py` with your program, and
-adjust `maestro.toml`.
+A stress test of Maestro's scheduler, for the machines q1 to q12. Its
+containers do no useful work: each takes up the CPUs and memory it asked for
+(or only reserves them) for a while, and writes `report.json` with what it
+used. What it tests is how Maestro places, queues and interleaves a thousand
+lines of very different sizes.
 
 | File | What it is |
 | --- | --- |
-| `Dockerfile` | Builds the image; your program is its `ENTRYPOINT` |
-| `maestro.toml` | Which machines, one container per line of `parameters`, the `cpus`, `memory` and `env` of each, which `outputs` to keep |
-| `genvrs.py` | Computes more lines: every instance in `instances/`, at three capacities, giving the big ones more memory through `Config` |
-| `main.py` | The program: solves one instance and writes `solution.json` |
-| `knapsack.py` | Reads the instances for `main.py` |
-| `instances/` | The problems, one file each |
-| `requirements.txt` | The program's Python dependencies |
+| `Dockerfile` | Builds the image: Python and `main.py`, nothing to install |
+| `maestro.toml` | Only q1 to q12, one line of `parameters` per mode, the default `cpus`, `memory`, `env` and `outputs` |
+| `genvrs.py` | Computes 996 more lines, which makes 1000, a run's most. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
+| `main.py` | The program: `sleep`, `burn`, `hold` or `mix` for some seconds |
+
+The shapes, for machines of 20 cores and about 15 GB:
+
+| Shape | CPUs | Memory | Lines |
+| --- | ---: | ---: | ---: |
+| tiny | 1 | 64 MB | 153 |
+| default | 1 | 512 MB | 221 + 4 |
+| small | 1 | 256 MB | 92 |
+| medium | 2 | 1 GB | 143 |
+| wide | 8 | 512 MB | 83 |
+| tall | 1 | 6 GB | 71 |
+| large | 4 | 4 GB | 107 |
+| xlarge | 8 | 8 GB | 62 |
+| half | 10 | 7 GB | 55 |
+| whole | 20 | 14 GB | 9 |
+
+And the modes, what `main.py` does with them:
+
+- `sleep` holds nothing: the line only keeps its cpus and memory from others.
+- `burn` keeps every core it was given busy.
+- `hold` fills `--fraction` of its memory and touches it every second.
+- `mix` does both.
+
+Lines last 10 s to 2 min, the `half` and `whole` ones twice that: about 14
+minutes of the twelve machines' cores, were they packed perfectly. One in ten
+runs with `--samples` and also keeps `samples.csv`; every hundredth ends with
+`--exit-code 3`, so that a run has failed lines to show.
 
 ```sh
-maestro build <your fork> --watch   # build, run, and follow until it ends
-maestro runs get <run>              # download the outputs and logs
+maestro build <your fork> --watch     # build, run once, and follow it
+maestro run <build>                   # again: 9 more for 10 000 containers
+maestro queue                         # where the lines wait
+maestro top q1                        # one machine, as it fills
+maestro runs get <run>                # the reports and logs
 ```
 
-Or step by step: `maestro build <your fork>`, then `maestro run <build>` and
-`maestro runs show <run>`. A public repo needs no forge token; add one with
-`maestro forges add` for private repos.
+A run has at most 1000 lines, so the 10 000 containers are ten runs of the
+same build. Every run of a build is the same lines; a different `SEED` in
+`genvrs.py` and a new build draw others.
 
-Lines wait in a queue before they start, and those of different users are
-interleaved as the Maestro administrator set the scheduler up, so a large
-run doesn't hold everyone else back. A line starts once a machine has its
-`cpus` and `memory` free: asking for what your program needs, and no more,
-starts it sooner. `maestro queue` shows where your lines wait and your share
-of the machines; `maestro usage`, what they used.
-
-Without a `maestro.toml`, Maestro runs the image's own `CMD` once, on any
-machine, and keeps only what it prints.
+On the machines whose Podman can't limit CPU, `burn` uses only the cores it
+asked for, but nothing stops it from using more: Maestro still counts only
+those.

@@ -5,7 +5,8 @@
 __pycache__/
 *.pyc
 .venv/
-solution.json
+report.json
+samples.csv
 README.md
 
 # Read by Maestro from the repo when it builds, not by the program.

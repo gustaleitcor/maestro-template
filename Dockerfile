@@ -1,15 +1,18 @@
 FROM docker.io/library/python:3.12-slim
 
-# Relative `outputs` are looked for here.
+# main.py needs only Python's standard library: nothing to install. No .pyc
+# files, and printed lines reach the log as they are printed.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Relative `outputs` (report.json, samples.csv) are looked for here.
 WORKDIR /work
 
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
-COPY . /app
+COPY main.py /app/main.py
 
-# Your program. Each line of `parameters` replaces CMD and reaches it as
-# arguments; -u prints as it goes, so logs can be followed.
-ENTRYPOINT ["python", "-u", "/app/main.py"]
+# The program. Each line of `parameters` replaces CMD and reaches it as
+# arguments.
+ENTRYPOINT ["python", "/app/main.py"]
 
-# Used when maestro.toml has no lines.
-CMD ["small"]
+# Used when maestro.toml has no lines: ten seconds of sleep.
+CMD ["sleep", "10"]
