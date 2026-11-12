@@ -13,7 +13,9 @@ lines of very different sizes.
 | `genvrs.py` | Computes 996 more lines, which makes 1000, a run's most. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
 | `main.py` | The program: `sleep`, `burn`, `hold` or `mix` for some seconds |
 
-The shapes, for machines of 20 cores and about 15 GB:
+The shapes, for machines of 20 cores and about 15 GB of which 10 cores and
+4 GB are kept back: 10 cores and 11065 MB left for lines on the smallest. orq
+refuses a run with a line larger than that, so none is.
 
 | Shape | CPUs | Memory | Lines |
 | --- | ---: | ---: | ---: |
@@ -21,12 +23,12 @@ The shapes, for machines of 20 cores and about 15 GB:
 | default | 1 | 512 MB | 221 + 4 |
 | small | 1 | 256 MB | 92 |
 | medium | 2 | 1 GB | 143 |
-| wide | 8 | 512 MB | 83 |
+| wide | 6 | 512 MB | 83 |
 | tall | 1 | 6 GB | 71 |
 | large | 4 | 4 GB | 107 |
-| xlarge | 8 | 8 GB | 62 |
-| half | 10 | 7 GB | 55 |
-| whole | 20 | 14 GB | 9 |
+| xlarge | 6 | 8 GB | 62 |
+| half | 5 | 5 GB | 55 |
+| whole | 10 | 10 GB | 9 |
 
 And the modes, what `main.py` does with them:
 
@@ -35,10 +37,11 @@ And the modes, what `main.py` does with them:
 - `hold` fills `--fraction` of its memory and touches it every second.
 - `mix` does both.
 
-Lines last 10 s to 2 min, the `half` and `whole` ones twice that: about 14
-minutes of the twelve machines' cores, were they packed perfectly. One in ten
-runs with `--samples` and also keeps `samples.csv`; every hundredth ends with
-`--exit-code 3`, so that a run has failed lines to show.
+Lines last 10 s to 2 min, the `half` and `whole` ones twice that: about 21
+minutes of the 120 cores the twelve machines leave for lines, were they
+packed perfectly. One in ten runs with `--samples` and also keeps
+`samples.csv`; every hundredth ends with `--exit-code 3`, so that a run has
+failed lines to show.
 
 ```sh
 maestro build <your fork> --watch     # build, run once, and follow it

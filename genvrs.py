@@ -6,9 +6,11 @@ for, from SHAPES; a mode, what main.py does with them; and how long. They are
 drawn at random, from a fixed seed, so every build of a commit gives the
 same lines.
 
-Sizes are for the q1 to q12 machines: 20 cores and about 15 GB each, the
-smallest 15161 MB. A line larger than every machine maestro.toml names is
-refused, so none asks for more.
+Sizes are for the q1 to q12 machines as they are set up: 20 cores and about
+15 GB each, the smallest 15161 MB, of which 10 cores and 4096 MB are kept
+back, leaving 10 cores and 11065 MB for lines. A run with a line larger than
+what every machine maestro.toml names leaves for lines is refused whole, so
+none asks for more.
 """
 
 import random
@@ -34,12 +36,12 @@ SHAPES: tuple[Shape, ...] = (
     Shape("default", None, None, 20),
     Shape("small", 1, 256, 10),
     Shape("medium", 2, 1024, 15),
-    Shape("wide", 8, 512, 8),  # many cores, little memory
+    Shape("wide", 6, 512, 8),  # many cores, little memory
     Shape("tall", 1, 6144, 8),  # one core, much memory
     Shape("large", 4, 4096, 10),
-    Shape("xlarge", 8, 8192, 6),
-    Shape("half", 10, 7168, 4),
-    Shape("whole", 20, 14336, 1),  # a machine to itself
+    Shape("xlarge", 6, 8192, 6),
+    Shape("half", 5, 5120, 4),
+    Shape("whole", 10, 10240, 1),  # all a machine leaves for lines
 )
 
 # What main.py does with them, and how often.
@@ -73,7 +75,7 @@ def genvrs() -> Generator[str]:
         mode = rng.choices(list(MODES), weights=list(MODES.values()))[0]
         # Mostly short, some long; the largest shapes stay longer.
         seconds = rng.choice((10, 20, 30, 45, 60, 90, 120))
-        if shape.cpus is not None and shape.cpus >= 10:
+        if shape.name in ("half", "whole"):
             seconds *= 2
 
         Config.cpus = shape.cpus
