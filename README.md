@@ -53,7 +53,9 @@ maestro runs get <run>                # the reports and logs
 
 A run has at most 1000 lines, so the 10 000 containers are ten runs of the
 same build. Every run of a build is the same lines; a different `SEED` in
-`genvrs.py` and a new build draw others.
+`genvrs.py` draws others, with no new build: `maestro run <build> -g
+genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, other
+machines.
 
 On the machines whose Podman can't limit CPU, `burn` uses only the cores it
 asked for, but nothing stops it from using more: Maestro still counts only
