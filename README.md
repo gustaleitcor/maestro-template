@@ -9,7 +9,7 @@ lines of very different sizes.
 | File | What it is |
 | --- | --- |
 | `Dockerfile` | Builds the image: Python and `main.py`, nothing to install |
-| `maestro.toml` | Only q1 to q12, one line of `parameters` per mode, the default `cpus`, `memory`, `env` and `outputs` |
+| `maestro.toml` | Only q1 to q12, one line of `parameters` per mode, the default `cpus`, `memory`, `time`, `retries`, `env` and `outputs` |
 | `genvrs.py` | Computes 996 more lines, which makes 1000. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
 | `main.py` | The program: `sleep`, `burn`, `hold` or `mix` for some seconds |
 
@@ -41,20 +41,26 @@ Lines last 10 s to 2 min, the `half` and `whole` ones twice that: about 21
 minutes of the 120 cores the twelve machines leave for lines, were they
 packed perfectly. One in ten runs with `--samples` and also keeps
 `samples.csv`; every hundredth ends with `--exit-code 3`, so that a run has
-failed lines to show.
+failed lines to show. Every line may run for 10 minutes (`time`). A line
+whose machine is lost goes back to the queue, up to twice (`retries`), so
+restarting a machine in the middle of a run loses none of its lines.
 
 ```sh
 maestro build <your fork> --watch     # build, run once, and follow it
 maestro run <build>                   # again: 9 more for 10 000 containers
-maestro queue                         # where the lines wait
+maestro queue                         # the user, dispatcher and machine queues
 maestro top q1                        # one machine, as it fills
+maestro runs show <run> --failed      # the lines that didn't succeed
+maestro runs retry <run>              # run those again
+maestro runs cancel <run> --line 7    # stop one line and leave the rest
 maestro runs get <run>                # the reports and logs
 ```
 
 Each run is 1000 lines, so the 10 000 containers are ten runs of the same
-build. Every run of a build is the same lines; a different `SEED` in
-`genvrs.py` draws others, with no new build: `maestro run <build> -g
-genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, other
+build. Maestro takes up to 5000 lines in a run, but ten runs show more of how
+the queue takes turns. Every run of a build is the same lines; a different
+`SEED` in `genvrs.py` draws others, with no new build: `maestro run <build>
+-g genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, other
 machines.
 
 On the machines whose Podman can't limit CPU, `burn` uses only the cores it

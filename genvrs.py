@@ -17,7 +17,8 @@ import random
 from collections.abc import Generator
 from typing import NamedTuple
 
-# With maestro.toml's 4 lines of parameters, a run of 1000, Maestro's most.
+# With maestro.toml's 4 lines of parameters, a run of 1000. Maestro takes up
+# to 5000, but ten runs show more of the queue than two.
 LINES = 996
 SEED = 2026
 
@@ -65,6 +66,11 @@ class Config:
     memory: int | None = None
     # Variables of each container's environment. Default: none.
     env: dict[str, str] | None = None
+    # The longest the line may run, such as "90m". Default: the server's.
+    time: str | None = None
+    # Times the line goes back to the queue if its machine is lost, 0 to 5.
+    # Default: 0.
+    retries: int | None = None
 
 
 def genvrs() -> Generator[str]:

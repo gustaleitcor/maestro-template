@@ -18,8 +18,8 @@ parameters = [
   "mix 30",
 ]
 
-# More lines, computed: 996 of many sizes, which makes 1000, the most a run
-# may have. Its class Config changes outputs, cpus, memory and env per line.
+# More lines, computed: 996 of many sizes, which makes 1000. Its class Config
+# changes outputs, cpus, memory and env for each line.
 generator = "genvrs.py"
 
 # What each container may use: whole CPU cores, and memory in MB. There is
@@ -28,9 +28,19 @@ generator = "genvrs.py"
 cpus = 1
 memory = 512
 
-# Variables of each container's environment, besides orq's own MAESTRO_CPUS,
-# MAESTRO_MEMORY and the like, which main.py reads. Default: none. The
-# generator's lines set their own instead.
+# The longest a line may run. Maestro stops it after that, keeps its logs and
+# outputs, and ends it as error. Default: the server's limit, a week unless
+# the administrator set another. No line here needs more than 4 minutes.
+time = "10m"
+
+# How many times a line goes back to the queue when its machine is lost under
+# it: restarted, removed, or its container gone. 0 to 5. Default: 0, which
+# ends such a line as error. Every line here can start over from scratch.
+retries = 2
+
+# Variables of each container's environment, besides Maestro's own
+# MAESTRO_CPUS, MAESTRO_MEMORY and the like, which main.py reads. Default:
+# none. The generator's lines set their own instead.
 env = { STRESS_LINE = "parameters", STRESS_SHAPE = "default" }
 
 # Copied out of each container when it ends. What it prints is always kept.
