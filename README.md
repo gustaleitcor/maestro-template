@@ -10,7 +10,7 @@ lines of very different sizes.
 | --- | --- |
 | `Dockerfile` | Builds the image: Python and `main.py`, nothing to install |
 | `maestro.toml` | Only q1 to q12, one line of `parameters` per mode, the default `cpus`, `memory`, `env` and `outputs` |
-| `genvrs.py` | Computes 996 more lines, which makes 1000, a run's most. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
+| `genvrs.py` | Computes 996 more lines, which makes 1000. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
 | `main.py` | The program: `sleep`, `burn`, `hold` or `mix` for some seconds |
 
 The shapes, for machines of 20 cores and about 15 GB of which 10 cores and
@@ -51,8 +51,8 @@ maestro top q1                        # one machine, as it fills
 maestro runs get <run>                # the reports and logs
 ```
 
-A run has at most 1000 lines, so the 10 000 containers are ten runs of the
-same build. Every run of a build is the same lines; a different `SEED` in
+Each run is 1000 lines, so the 10 000 containers are ten runs of the same
+build. Every run of a build is the same lines; a different `SEED` in
 `genvrs.py` draws others, with no new build: `maestro run <build> -g
 genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, other
 machines.
