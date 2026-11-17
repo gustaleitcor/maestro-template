@@ -1,7 +1,7 @@
 # How Maestro runs the stress test. Every key is optional.
 
 # Where it may run: names from `maestro machines list`. Default: any machine.
-machines = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12"]
+# machines = ["dual"]
 
 # What the image is built from, a path from the root of the repo, which stays
 # the build's context. Default: the Containerfile, or else the Dockerfile, at

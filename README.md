@@ -1,6 +1,6 @@
 # maestro-template: stress
 
-A stress test of Maestro's scheduler, for the machines q1 to q12. Its
+A stress test of Maestro's scheduler, on whatever machines it has. Its
 containers do no useful work: each takes up the CPUs and memory it asked for
 (or only reserves them) for a while, and writes `report.json` with what it
 used. What it tests is how Maestro places, queues and interleaves a thousand
@@ -9,13 +9,15 @@ lines of very different sizes.
 | File | What it is |
 | --- | --- |
 | `Dockerfile` | Builds the image: Python and `main.py`, nothing to install |
-| `maestro.toml` | Only q1 to q12, one line of `parameters` per mode, the default `cpus`, `memory`, `time`, `retries`, `env` and `outputs` |
+| `maestro.toml` | One line of `parameters` per mode, the default `cpus`, `memory`, `time`, `retries`, `env` and `outputs` |
 | `genvrs.py` | Computes 996 more lines, which makes 1000. Each gets a shape, a mode and a time, drawn from a fixed seed, and its own `cpus`, `memory`, `env` and `outputs` through `Config` |
 | `main.py` | The program: `sleep`, `burn`, `hold` or `mix` for some seconds |
 
-The shapes, for machines of 20 cores and about 15 GB of which 10 cores and
-4 GB are kept back: 10 cores and 11065 MB left for lines on the smallest. orq
-refuses a run with a line larger than that, so none is.
+The lines run on any machine. The largest asks for 10 cores and 10 GB.
+Maestro refuses a run when one of its lines is larger than what every
+machine has for lines. On smaller machines, make the shapes in `genvrs.py`
+smaller and send it with `maestro run <build> -g genvrs.py`, with no new
+build.
 
 | Shape | CPUs | Memory | Lines |
 | --- | ---: | ---: | ---: |
@@ -38,10 +40,9 @@ And the modes, what `main.py` does with them:
 - `mix` does both.
 
 Lines last 10 s to 2 min, the `half` and `whole` ones twice that: about 21
-minutes of the 120 cores the twelve machines leave for lines, were they
-packed perfectly. One in ten runs with `--samples` and also keeps
-`samples.csv`; every hundredth ends with `--exit-code 3`, so that a run has
-failed lines to show. Every line may run for 10 minutes (`time`). A line
+minutes of 120 cores, were they packed perfectly. One in ten runs with
+`--samples` and also keeps `samples.csv`; every hundredth ends with
+`--exit-code 3`, so that a run has failed lines to show. Every line may run for 10 minutes (`time`). A line
 whose machine is lost goes back to the queue, up to twice (`retries`), so
 restarting a machine in the middle of a run loses none of its lines.
 
@@ -49,7 +50,7 @@ restarting a machine in the middle of a run loses none of its lines.
 maestro build <your fork> --watch     # build, run once, and follow it
 maestro run <build>                   # again: 9 more for 10 000 containers
 maestro queue                         # the user, dispatcher and machine queues
-maestro top q1                        # one machine, as it fills
+maestro top                           # the machines, as they fill
 maestro runs show <run> --failed      # the lines that didn't succeed
 maestro runs retry <run>              # run those again
 maestro runs cancel <run> --line 7    # stop one line and leave the rest
@@ -60,8 +61,8 @@ Each run is 1000 lines, so the 10 000 containers are ten runs of the same
 build. Maestro takes up to 5000 lines in a run, but ten runs show more of how
 the queue takes turns. Every run of a build is the same lines; a different
 `SEED` in `genvrs.py` draws others, with no new build: `maestro run <build>
--g genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, other
-machines.
+-g genvrs.py` sends it from here, and `-c` a `maestro.toml` with, say, only some
+of the machines.
 
 On the machines whose Podman can't limit CPU, `burn` uses only the cores it
 asked for, but nothing stops it from using more: Maestro still counts only

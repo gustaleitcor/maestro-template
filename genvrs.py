@@ -6,11 +6,10 @@ for, from SHAPES; a mode, what main.py does with them; and how long. They are
 drawn at random, from a fixed seed, so every build of a commit gives the
 same lines.
 
-Sizes are for the q1 to q12 machines as they are set up: 20 cores and about
-15 GB each, the smallest 15161 MB, of which 10 cores and 4096 MB are kept
-back, leaving 10 cores and 11065 MB for lines. A run with a line larger than
-what every machine maestro.toml names leaves for lines is refused whole, so
-none asks for more.
+The largest line asks for 10 cores and 10240 MB. Maestro refuses a run
+whole when one of its lines is larger than what every machine leaves for
+lines, so on smaller machines make SHAPES smaller, and send this file with
+`maestro run <build> -g genvrs.py`.
 """
 
 import random
@@ -42,7 +41,7 @@ SHAPES: tuple[Shape, ...] = (
     Shape("large", 4, 4096, 10),
     Shape("xlarge", 6, 8192, 6),
     Shape("half", 5, 5120, 4),
-    Shape("whole", 10, 10240, 1),  # all a machine leaves for lines
+    Shape("whole", 10, 10240, 1),  # the largest
 )
 
 # What main.py does with them, and how often.
