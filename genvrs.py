@@ -28,6 +28,11 @@ class Config:
     memory: int | None = None
     # Variables of each container's environment. Default: none.
     env: dict[str, str] | None = None
+    # The longest the line may run, such as "90m". Default: the server's.
+    time: str | None = None
+    # Times the line goes back to the queue if its machine is lost, 0 to 5.
+    # Default: 0.
+    retries: int | None = None
 
 
 def genvrs() -> Generator[str]:
@@ -39,8 +44,10 @@ def genvrs() -> Generator[str]:
         # Bigger instances get longer to prove their answer is the best.
         seconds = 10 if items <= 30 else 60
 
-        # And more memory for the solver's search tree than maestro.toml's.
+        # And more memory for the solver's search tree than maestro.toml's,
+        # and two cores, which main.py gives the solver as threads.
         Config.memory = None if items <= 30 else 1024
+        Config.cpus = None if items <= 30 else 2
         Config.env = {"ITEMS": str(items)}
 
         for scale in SCALES:

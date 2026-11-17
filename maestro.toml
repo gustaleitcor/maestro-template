@@ -11,7 +11,8 @@ parameters = [
 ]
 
 # More lines, computed: one per string that genvrs() yields in this file.
-# Its class Config can change outputs, cpus, memory and env for each line.
+# Its class Config can change outputs, cpus, memory, env, time and retries
+# for each line.
 generator = "genvrs.py"
 
 # What each container may use: whole CPU cores, and memory in MB. There is
@@ -21,9 +22,26 @@ generator = "genvrs.py"
 cpus = 1
 memory = 512
 
-# Variables of each container's environment, besides orq's own MAESTRO_CPUS,
-# MAESTRO_MEMORY and the like, which main.py reads. Default: none.
+# The longest a line may run. Maestro stops it after that and ends it as
+# error. main.py reads it from MAESTRO_TIME and ends its search 15 seconds
+# before, so "large --time-limit 120" stops on its own. Default: the server's
+# limit, a week unless the administrator set another.
+time = "2m"
+
+# How many times a line goes back to the queue when its machine is lost under
+# it. A solve can start over from the beginning. 0 to 5. Default: 0.
+retries = 2
+
+# Variables of each container's environment, besides Maestro's own
+# MAESTRO_CPUS, MAESTRO_MEMORY and the like, which main.py reads. Default:
+# none.
 env = { SEED = "42" }
 
 # Copied out of each container when it ends. What it prints is always kept.
-outputs = ["solution.json"]
+outputs = ["results/"]
+
+# Where the outputs go: "per-line", a directory for each line, or "shared",
+# one tree for the whole run. Shared puts every solution in one results/
+# folder, `<run>/shared/results/` after `maestro runs get`. Default:
+# "per-line".
+outputs_layout = "shared"

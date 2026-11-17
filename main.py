@@ -1,4 +1,5 @@
-"""Solves one knapsack instance with mip and writes solution.json.
+"""Solves one knapsack instance with mip and writes its solution to
+results/<instance>-<capacity>.json.
 
 Its arguments are one line of `parameters` from maestro.toml, or one that
 genvrs.py yielded: `small`, `large --capacity 300 --time-limit 60`.
@@ -40,7 +41,13 @@ take = [model.add_var(var_type=BINARY) for _ in items]
 model.objective = maximize(xsum(take[i] * real(instance.values[i]) for i in items))
 model += xsum(take[i] * real(instance.weights[i]) for i in items) <= real(capacity)
 
-status = model.optimize(max_seconds=args.time_limit)
+# Maestro stops the line once its time (MAESTRO_TIME, in seconds) is up. The
+# search ends 15 seconds before, so that the best solution found is written.
+seconds = args.time_limit
+if (limit := int(os.environ.get("MAESTRO_TIME", "0"))) > 0:
+    seconds = min(seconds, max(1, limit - 15))
+
+status = model.optimize(max_seconds=seconds)
 if status not in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE):
     sys.exit(f"{args.instance}: no solution ({status.name})")
 
@@ -54,7 +61,10 @@ solution: dict[str, object] = {
     "weight": sum(instance.weights[i] for i in taken),
     "items": taken,
 }
-with open("solution.json", "w") as f:
+# Every line writes into the same results/ (outputs_layout = "shared" in
+# maestro.toml), so each file is named after its instance and capacity.
+os.makedirs("results", exist_ok=True)
+with open(f"results/{args.instance}-{capacity}.json", "w") as f:
     json.dump(solution, f, indent=2)
 
 # Printed lines are kept as the container's log.
