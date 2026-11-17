@@ -15,3 +15,34 @@ parameters = [
 
 # Copied out of each container when it ends. What it prints is always kept.
 outputs = ["out.txt"]
+
+# The rest are commented out, at their defaults.
+
+# What each container may use: whole CPU cores, and memory in MB. A line
+# starts once a machine has that much free, so ask for what you need.
+# cpus = 1
+# memory = 512
+
+# The longest a line may run, such as "90m" or "2h". Maestro then stops it.
+# Default: the server's limit, a week unless the administrator set another.
+# time = "2h"
+
+# How many times a line goes back to the queue when its machine is lost
+# under it, 0 to 5. Default: 0.
+# retries = 0
+
+# Variables of each container's environment. Names can't start with
+# MAESTRO_, which Maestro sets itself (MAESTRO_CPUS, MAESTRO_TIME, ...).
+# env = { SEED = "42" }
+
+# "per-line" keeps each line's outputs in a directory of its own. "shared"
+# puts every line's in one tree for the run.
+# outputs_layout = "per-line"
+
+# How often a running line's logs and outputs are copied out, at least
+# "10m". Default: only when the line ends.
+# outputs_every = "30m"
+
+# The file the image is built from. Default: Containerfile, or else
+# Dockerfile, at the root.
+# dockerfile = "Dockerfile"
